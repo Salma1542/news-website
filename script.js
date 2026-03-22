@@ -1,46 +1,46 @@
 //standing code
 
 let key = "d41bd599b278b642c07f40fbf670327bafc0fb0a0536c67430cf99ff7e9f232a";
-// const url = `https://apiv2.allsportsapi.com/football/?&met=Standings&leagueId=152&APIkey=${key}`;
+const url = `https://apiv2.allsportsapi.com/football/?&met=Standings&leagueId=152&APIkey=${key}`;
 
-// fetch(url)
-//   .then((res) => res.json())
-//   .then((data) => {
-//     renderStandigs(data);
-//   });
-// function renderStandigs(data) {
-//   let tableBody = document.querySelector(".tableBody");
-//   const teams = data.result.total;
-//   tableBody.innerHTML = "";
-//   teams.forEach((team) => {
-//     tableBody.innerHTML += `
+fetch(url)
+  .then((res) => res.json())
+  .then((data) => {
+    renderStandigs(data);
+  });
+function renderStandigs(data) {
+  let tableBody = document.querySelector(".tableBody");
+  const teams = data.result.total;
+  tableBody.innerHTML = "";
+  teams.forEach((team) => {
+    tableBody.innerHTML += `
        
-//     <tr>
-//           <td>
-//           ${team.standing_place}
-//           </td>
+    <tr>
+          <td>
+          ${team.standing_place}
+          </td>
 
-// <td class="text-start">
-// <div class="team-info">
-// <img src="${team.team_logo}">
-// <span>${team.standing_team}</span>
-// </div>
-// </td>
+<td class="text-start">
+<div class="team-info">
+<img src="${team.team_logo}">
+<span>${team.standing_team}</span>
+</div>
+</td>
 
-//       <td >${team.standing_P}</td>
-//      <td>${team.standing_W}</td>
-//      <td>${team.standing_D}</td>
-//       <td>${team.standing_L}</td>
-//      <td>${team.standing_F}</td>
-//      <td>${team.standing_A}</td>
-//      <td>${team.standing_GD}</td>
-//      <td class="score">${team.standing_PTS}</td>
-//     </tr>
+      <td >${team.standing_P}</td>
+     <td>${team.standing_W}</td>
+     <td>${team.standing_D}</td>
+      <td>${team.standing_L}</td>
+     <td>${team.standing_F}</td>
+     <td>${team.standing_A}</td>
+     <td>${team.standing_GD}</td>
+     <td class="score">${team.standing_PTS}</td>
+    </tr>
   
-//         `;
+        `;
         
-//   });
-// }
+  });
+}
 
 
 
