@@ -43,114 +43,103 @@ function renderStandigs(data) {
 }
 
 
-
-//stats code
-const topURL = `https://apiv2.allsportsapi.com/football/?&met=Topscorers&leagueId=152&APIkey=${key}`;
+const leagueId = "152"; 
+const topURL = `https://apiv2.allsportsapi.com/football/?met=Topscorers&leagueId=${leagueId}&APIkey=${key}`;
 
 fetch(topURL)
   .then(res => res.json())
   .then(data => {
     if (data.success === 1 && data.result) {
-      getTopScores(data.result);
+      renderTopScorers(data.result);
     }
   })
-  .catch(err => console.error('Fetch error:', err));
+  .catch(err => console.error('Error fetching scorers:', err));
 
-function getTopScores(data) {
-  const topTable = document.querySelector('.top-body'); 
-  if (!topTable) {
-    console.error('top-body element not found!');
-    return;
-  }
-
+function renderTopScorers(data) {
+  const topTable = document.querySelector('.top-body');
+  if (!topTable) return;
   topTable.innerHTML = '';
 
-  data.forEach(item => {
-    const assists = item.assists ?? 0; 
+  data.slice(0, 10).forEach(item => {
+    const assists = item.assists ?? 0;
+    const shortName = item.player_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
 
     topTable.innerHTML += `
       <tr>
         <td>
           <div class="d-flex align-items-center">
             <span class="rank me-3">${item.player_place}</span>
-            <span class="avatar blue-avatar me-2">
-              ${item.player_name.split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase()}
-            </span>
+            <span class="avatar blue-avatar me-2">${shortName}</span>
             <div>
-              <div class="player-name">${item.player_name}</div>
-              <div class="player-team">${item.team_name}</div>
+              <div class="player-name small fw-bold">${item.player_name}</div>
+              <div class="player-team x-small " style="font-size:0.75rem ;color:white">${item.team_name}</div>
             </div>
           </div>
         </td>
         <td class="text-center"><span class="badge-stat blue-bg">${item.goals}</span></td>
         <td class="text-center"><span class="badge-stat green-text">${assists}</span></td>
-      </tr>
-    `;
+      </tr>`;
   });
 }
-const teamsURL = `https://apiv2.allsportsapi.com/football/?met=Teams&leagueId=152&APIkey=${key}`;
+
+const teamsURL = `https://apiv2.allsportsapi.com/football/?met=Teams&leagueId=${leagueId}&APIkey=${key}`;
 
 fetch(teamsURL)
-.then(res => res.json())
-.then(data => {
+  .then(res => res.json())
+  .then(data => {
+    if (data.success === 1) {
+      let allPlayers = [];
+      data.result.forEach(team => {
+        if (team.players) {
+          team.players.forEach(p => {
+            p.team_name = team.team_name;
+            p.team_logo = team.team_logo;
+            allPlayers.push(p);
+          });
+        }
+      });
 
-  if(data.success === 1){
+      allPlayers.sort((a, b) => {
+        const scoreA = parseInt(a.player_yellow_cards || 0) + parseInt(a.player_red_cards || 0);
+        const scoreB = parseInt(b.player_yellow_cards || 0) + parseInt(b.player_red_cards || 0);
+        return scoreB - scoreA;
+      });
 
-    let allPlayers = [];
+      renderCardsTable(allPlayers.slice(0, 15));
+    }
+  })
+  .catch(err => console.error('Error fetching cards:', err));
 
-    data.result.forEach(team => {
-      if(team.players){
-        allPlayers = allPlayers.concat(team.players);
-      }
-    });
-const top10Players = allPlayers.slice(0, 22);
+function renderCardsTable(players) {
+  const cardsBody = document.querySelector('.cards-body');
+  if (!cardsBody) return;
+  cardsBody.innerHTML = '';
 
-    getPlayersCards(top10Players);
-  }
+  players.forEach((item, index) => {
+    const shortName = item.player_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    const playerImg = item.player_image 
+        ? `<img src="${item.player_image}" class="player-img" style="width:30px; height:30px; border-radius:50%; object-fit:cover">`
+        : `<span class="avatar blue-avatar me-2">${shortName}</span>`;
 
-})
-.catch(err => console.error(err));
-function getPlayersCards(players){
-
-  let cardsbody = document.querySelector('.cards-body');
-  cardsbody.innerHTML = '';
-
-  players.forEach((item,index)=>{
-const playerImg = item.player_image 
-    ? `<img src="${item.player_image}" class="player-img">`
-    : `<span class="avatar blue-avatar me-2">
-          ${item.player_name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase()}
-       </span>`;
-    cardsbody.innerHTML += `
+    cardsBody.innerHTML += `
       <tr>
-
         <td>
           <div class="d-flex align-items-center">
-
-            <span class="rank me-3">${index+1}</span>
-
+            <span class="rank me-2">${index + 1}</span>
             ${playerImg}
-
-            <div>
-              <div class="player-name">${item.player_name}</div>
+            <div class="ms-2">
+              <div class="player-name small fw-bold">${item.player_name}</div>
+              <div class="player-team x-small text-muted" style="font-size:0.7rem">
+                <img src="${item.team_logo}" style="width:30px;height:30px; border-radius:50%; margin-right:2px"><span style="color:white"> ${item.team_name}</span>
+              </div>
             </div>
-
           </div>
         </td>
-
-        <td class="text-center">
-          ${item.player_red_cards || 0}
-        </td>
-
-        <td class="text-center">
-          ${item.player_yellow_cards || 0}
-        </td>
-
-      </tr>
-    `
-  })
+        <td class="text-center text-warning fw-bold">${item.player_yellow_cards || 0}</td>
+        <td class="text-center text-danger fw-bold">${item.player_red_cards || 0}</td>
+      </tr>`;
+  });
 }
-
 //matches page
 
 const liveURL=`https://apiv2.allsportsapi.com/football/?met=Livescore&APIkey=${key}`
@@ -242,5 +231,6 @@ fetch(dateUrl).then(res=>res.json())
             }
           }) .catch(err => console.error('Fetch error:', err));
 })
+
 /* home page */
 

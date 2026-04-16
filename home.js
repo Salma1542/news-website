@@ -93,7 +93,7 @@ function getTopHeadlines(news) {
             </div>
         `;
     });
-}const category = ['Business', 'Technology', 'Entertainment', 'Sports', 'Science', 'Health'];
+}const category = ['Economy', 'Technology', 'Entertainment', 'Sports', 'Science', 'Health'];
 
 async function initNews() {
     const newsContainer = document.querySelector('#news-sections');
